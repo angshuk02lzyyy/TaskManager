@@ -1,14 +1,23 @@
 <?php
+header("Content-Type: application/json");
 require 'db.php';
 
-$id = $_POST['id'];
+$id = intval($_POST['id'] ?? 0);
 
-// Toggle completed status
-$sql = "UPDATE tasks SET completed = NOT completed WHERE id = ?";
-$stmt = $conn->prepare($sql);
+if ($id <= 0) {
+    echo json_encode(["status" => "error", "message" => "Invalid ID"]);
+    exit;
+}
+
+$stmt = $conn->prepare("UPDATE tasks SET completed = NOT completed WHERE id = ?");
 $stmt->bind_param("i", $id);
-$stmt->execute();
 
-echo json_encode(["status" => "updated"]);
+if ($stmt->execute()) {
+    echo json_encode(["status" => "updated"]);
+} else {
+    echo json_encode(["status" => "error", "message" => $stmt->error]);
+}
+
+$stmt->close();
 $conn->close();
 ?>
