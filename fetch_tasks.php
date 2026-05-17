@@ -1,11 +1,17 @@
 <?php
+header("Content-Type: application/json");
 require 'db.php';
 
-$sql = "SELECT * FROM tasks ORDER BY id DESC";
+$sql    = "SELECT id, title, description, completed FROM tasks ORDER BY id DESC";
 $result = $conn->query($sql);
 
-$tasks = [];
+if (!$result) {
+    echo json_encode(["status" => "error", "message" => $conn->error]);
+    $conn->close();
+    exit;
+}
 
+$tasks = [];
 while ($row = $result->fetch_assoc()) {
     $tasks[] = $row;
 }
